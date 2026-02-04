@@ -20,11 +20,10 @@ A Node.js script to automate taking screenshots of websites using Playwright.
    npm install
    ```
 
-3. **Install Browsers**:
-   Playwright needs to download its browser binaries:
-   ```bash
-   npx playwright install
-   ```
+3. **Verify Chrome Installation**:
+   This script now uses the Google Chrome browser installed on your system. Make sure Google Chrome is installed.
+   
+   *Note: You do NOT need to run `npx playwright install` if you have Chrome installed.*
 
 ## Usage
 
@@ -53,6 +52,20 @@ https://github.com
 Run the script:
 ```bash
 node capture.js urls.txt 1
+```
+
+### Custom Chrome Path
+If Chrome is installed in a non-standard location, you can specify the path using the `CHROME_PATH` environment variable:
+
+**Mac/Linux:**
+```bash
+CHROME_PATH="/path/to/google/chrome" node capture.js https://example.com
+```
+
+**Windows:**
+```bash
+set CHROME_PATH="C:\Program Files\Google\Chrome\Application\chrome.exe"
+node capture.js https://example.com
 ```
 
 ## Output

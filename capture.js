@@ -23,7 +23,6 @@ async function capture() {
             urls = [input];
         }
     } catch (err) {
-        // Fallback to treating input as a URL if file check fails (e.g. permission issue or invalid path syntax treated as URL)
         urls = [input];
     }
 
@@ -37,7 +36,29 @@ async function capture() {
         fs.mkdirSync(screenshotsDir);
     }
 
-    const browser = await chromium.launch();
+    // Use system Chrome if possible
+    const launchOptions = {
+        channel: 'chrome', // upgrades to finding existing chrome installation
+        headless: true
+    };
+
+    // Allow manual override
+    if (process.env.CHROME_PATH) {
+        launchOptions.executablePath = process.env.CHROME_PATH;
+        delete launchOptions.channel; // executablePath overrides channel
+    }
+
+    console.log('Launching browser (System Chrome)...');
+    let browser;
+    try {
+        browser = await chromium.launch(launchOptions);
+    } catch (e) {
+        console.error('Failed to launch Chrome. Make sure Google Chrome is installed.');
+        console.error('Error details:', e.message);
+        console.error('You can also try setting CHROME_PATH environment variable to the executable path.');
+        process.exit(1);
+    }
+
     const context = await browser.newContext({
         viewport: { width: 1280, height: 720 }
     });

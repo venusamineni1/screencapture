@@ -55,7 +55,7 @@ async function capture() {
     // Use system Chrome if possible
     const launchOptions = {
         channel: 'chrome', // upgrades to finding existing chrome installation
-        headless: true
+        headless: false
     };
 
     // Allow manual override

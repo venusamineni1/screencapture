@@ -2,16 +2,32 @@ const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
 
+async function waitWithCountdown(page, ms) {
+    if (ms >= 1000) {
+        let remaining = ms;
+        while (remaining > 0) {
+            process.stdout.write(`Waiting ${Math.ceil(remaining / 1000)}s... \r`);
+            const step = Math.min(remaining, 1000);
+            await page.waitForTimeout(step);
+            remaining -= step;
+        }
+        process.stdout.write('\r\x1b[K');
+    } else if (ms > 0) {
+        await page.waitForTimeout(ms);
+    }
+}
+
 async function capture() {
     const args = process.argv.slice(2);
     if (args.length < 1) {
-        console.error('Usage: node capture.js <url_or_file> [count] [interval_ms]');
+        console.error('Usage: node capture.js <url_or_file> [count] [interval_ms] [initial_wait_ms]');
         process.exit(1);
     }
 
     const input = args[0];
     const count = parseInt(args[1]) || 1;
     const interval = parseInt(args[2]) || 1000;
+    const initialWait = parseInt(args[3]) || 0;
 
     let urls = [];
     try {
@@ -68,10 +84,15 @@ async function capture() {
         console.log(`\nProcessing URL: ${url}`);
 
         try {
-            await page.goto(url, { waitUntil: 'networkidle' });
+            await page.goto(url, { waitUntil: 'load' }); // Changed to 'load' to be safer, networkidle can be flaky
         } catch (e) {
             console.error(`Failed to navigate to ${url}: ${e.message}`);
             continue;
+        }
+
+        if (initialWait > 0) {
+            console.log(`Initial wait of ${initialWait}ms...`);
+            await waitWithCountdown(page, initialWait);
         }
 
         // Sanitize URL for filename
@@ -85,18 +106,7 @@ async function capture() {
             console.log(`Saved: ${filename}`);
 
             if (i < count - 1) {
-                if (interval >= 1000) {
-                    let remaining = interval;
-                    while (remaining > 0) {
-                        process.stdout.write(`Waiting ${Math.ceil(remaining / 1000)}s... \r`);
-                        const step = Math.min(remaining, 1000);
-                        await page.waitForTimeout(step);
-                        remaining -= step;
-                    }
-                    process.stdout.write('\r\x1b[K'); // Clear the line
-                } else {
-                    await page.waitForTimeout(interval);
-                }
+                await waitWithCountdown(page, interval);
             }
         }
     }

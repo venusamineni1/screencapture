@@ -35,12 +35,13 @@ node capture.js https://example.com
 
 ### Advanced Usage
 ```bash
-node capture.js <input> [count] [interval_ms]
+node capture.js <input> [count] [interval_ms] [initial_wait_ms]
 ```
 
 - **`input`**: URL string OR path to a text file containing URLs.
 - **`count`**: Number of screenshots to take (default: 1).
 - **`interval_ms`**: Time in milliseconds between screenshots (default: 1000).
+- **`initial_wait_ms`**: Time in milliseconds to wait after the page loads before taking the first screenshot (default: 0).
 
 ### Batch Processing
 Create a file (e.g., `urls.txt`) with one URL per line:

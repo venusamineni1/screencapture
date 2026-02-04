@@ -85,7 +85,18 @@ async function capture() {
             console.log(`Saved: ${filename}`);
 
             if (i < count - 1) {
-                await page.waitForTimeout(interval);
+                if (interval >= 1000) {
+                    let remaining = interval;
+                    while (remaining > 0) {
+                        process.stdout.write(`Waiting ${Math.ceil(remaining / 1000)}s... \r`);
+                        const step = Math.min(remaining, 1000);
+                        await page.waitForTimeout(step);
+                        remaining -= step;
+                    }
+                    process.stdout.write('\r\x1b[K'); // Clear the line
+                } else {
+                    await page.waitForTimeout(interval);
+                }
             }
         }
     }
